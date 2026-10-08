@@ -36,9 +36,7 @@ if (!localStorage.getItem("hasSeededNote")) {
   localStorage.setItem("notes", JSON.stringify(notes));
   localStorage.setItem("hasSeededNote", "true");
 }
-for (let i = 0; i < notes.length; i++) {
-  cardCreator(notes[i].title, notes[i].content, notes[i].id);
-}
+renderNotes();
 
 // Phase 2: Opening the editor
 newNoteBtn.addEventListener("click", function () {
@@ -50,6 +48,7 @@ newNoteBtn.addEventListener("click", function () {
   noteContent.value = "";
   noteTitle.focus();
   autoResizeTextarea();
+  renderNotes();
 });
 
 
@@ -70,6 +69,7 @@ for (let i = 0; i < backNavigationBtn.length; i++) {
         const note = { id: Date.now(), title, content };
         notes.push(note);
         cardCreator(title, content, note.id);
+        renderNotes();
       } else {
         const card = document.getElementById(uniqueNoteId);
         card.querySelector("h3").textContent = title || "Untitled Note";
@@ -81,6 +81,7 @@ for (let i = 0; i < backNavigationBtn.length; i++) {
         matched.content = content;
       }
       localStorage.setItem("notes", JSON.stringify(notes));
+      renderNotes();
     }
     closeEditor();
   });
@@ -131,6 +132,7 @@ deleteBtn.addEventListener("click", () => {
   notes.splice(index, 1);
   }
   localStorage.setItem("notes", JSON.stringify(notes));
+  renderNotes();
   closeEditor();
 });
 
@@ -162,7 +164,26 @@ search.addEventListener("focus", () => {
   newNoteBtn.style.display = "none";
 });
 
-searchInput.addEventListener("blur", () => {
+search.addEventListener("blur", () => {
   newNoteBtn.style.display = "block";
 });
 
+function renderNotes() {
+  savedNotesContainer.innerHTML = "";
+  notes.sort((a, b) => b.id - a.id);
+  if (notes.length === 0) {
+  showEmptyState();
+  }
+  for (let i = 0; i < notes.length; i++) {
+    cardCreator(notes[i].title, notes[i].content, notes[i].id);
+  }
+}
+
+function showEmptyState() {
+  savedNotesContainer.innerHTML = `
+    <div class="empty-state">
+      <p>No notes yet</p>
+      <p class="empty-subtitle">Tap "New Note" to create your first one</p>
+    </div>
+  `;
+}
